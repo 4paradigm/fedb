@@ -17,6 +17,14 @@
 # release.sh
 #
 set -x
+
+VERSION=`git describe --always --tag`
+VERSION=${VERSION:1}
+if [[ ! ($VERSION =~ ^[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}$) ]]; then
+    echo "$VERSION is not release version"
+    exit 0
+fi
+
 cmake_file="./CMakeLists.txt"
 i=1
 while((1==1))

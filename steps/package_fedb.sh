@@ -21,7 +21,6 @@ WORKDIR=`pwd`
 set -e
 ln -sf /usr/workdir/thirdparty thirdparty  || :
 ln -sf /usr/workdir/thirdsrc thirdsrc || :
-sed -i /[:blank:]*version/s/1.0/$1/ python/setup.py || :
 
 package=fedb-cluster-$1
 rm -rf ${package} || :
