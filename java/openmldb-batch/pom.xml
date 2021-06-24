@@ -49,8 +49,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 		<!-- Set the default project version -->
-		<default.project.version>0.1.2</default.project.version>
-		<default.hybridse.sdk.version>0.1.3</default.hybridse.sdk.version>
+		<default.project.version>0.1.4</default.project.version>
+		<default.hybridse.sdk.version>0.1.4</default.hybridse.sdk.version>
 	</properties>
 
 	<profiles>
@@ -60,21 +60,21 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<projectVersionFromProfile>${default.project.version}-SNAPSHOT</projectVersionFromProfile>
+				<projectVersionFromProfile>${default.project.version}</projectVersionFromProfile>
 				<hybridseCommonVersionFromProfile>${default.hybridse.sdk.version}</hybridseCommonVersionFromProfile>
 			</properties>
 		</profile>
 		<profile>
 			<id>macos</id>
 			<properties>
-				<projectVersionFromProfile>${default.project.version}-macos-SNAPSHOT</projectVersionFromProfile>
+				<projectVersionFromProfile>${default.project.version}-macos</projectVersionFromProfile>
 				<hybridseCommonVersionFromProfile>${default.hybridse.sdk.version}-macos</hybridseCommonVersionFromProfile>
 			</properties>
 		</profile>
 		<profile>
 			<id>allinone</id>
 			<properties>
-				<projectVersionFromProfile>${default.project.version}-allinone-SNAPSHOT</projectVersionFromProfile>
+				<projectVersionFromProfile>${default.project.version}-allinone</projectVersionFromProfile>
 				<hybridseCommonVersionFromProfile>${default.hybridse.sdk.version}-allinone</hybridseCommonVersionFromProfile>
 			</properties>
 		</profile>

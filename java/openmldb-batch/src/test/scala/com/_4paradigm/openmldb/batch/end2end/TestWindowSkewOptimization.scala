@@ -57,7 +57,7 @@ class TestWindowSkewOptimization extends FunSuite {
     val outputDf = sess.sql(sqlText)
 
     val sparksqlOutputDf = sess.sparksql(sqlText)
-    // Notice that the sum column type is different for SparkSQL and SparkFE
+    // Notice that the sum column type is different for SparkSQL
     assert(SparkUtil.approximateDfEqual(outputDf.getSparkDf(), sparksqlOutputDf, false))
   }
 

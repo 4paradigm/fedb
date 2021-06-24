@@ -26,7 +26,7 @@ object OpenmldbBatchMain {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val sparkMaster = "cluster"
-  private val appName: String = "SparkFeApp"
+  private val appName: String = "App"
 
   def main(args: Array[String]): Unit = {
     run(args)
@@ -49,7 +49,7 @@ object OpenmldbBatchMain {
     }
     val sparkSession = sessionBuilder.getOrCreate()
 
-    val sparkFeConfig = OpenmldbBatchConfig.fromSparkSession(sparkSession)
+    val openmldbBatchConfig = OpenmldbBatchConfig.fromSparkSession(sparkSession)
 
     val sess = new OpenmldbSession(sparkSession)
     sess.version()
@@ -59,8 +59,8 @@ object OpenmldbBatchMain {
     for ((name, path) <- inputTables.asScala) {
       logger.info(s"Try load table $name from: $path")
 
-      if (sparkFeConfig.tinyData > 0) {
-        sess.read(path).tiny(sparkFeConfig.tinyData).createOrReplaceTempView(name)
+      if (openmldbBatchConfig.tinyData > 0) {
+        sess.read(path).tiny(openmldbBatchConfig.tinyData).createOrReplaceTempView(name)
       } else {
         val df = sess.read(path)
         df.createOrReplaceTempView(name)
@@ -68,7 +68,7 @@ object OpenmldbBatchMain {
       }
     }
     val feconfig = DDLEngine.sql2Feconfig(sqlScript,
-      HybridseUtil.getDatabase(sparkFeConfig.configDBName, sess.registeredTables.toMap))
+      HybridseUtil.getDatabase(openmldbBatchConfig.configDBName, sess.registeredTables.toMap))
     //parseOpSchema(rquestEngine.getPlan)
     val tableInfoRDD = sess.getSparkSession.sparkContext.parallelize(Seq(feconfig)).repartition(1)
     HDFSUtil.deleteIfExist(config.getOutputPath + "/config")
@@ -79,7 +79,7 @@ object OpenmldbBatchMain {
     logger.info(s"output schema:${res.sparkDf.schema.toDDL}")
 
     res.sparkDf.show(100)
-    logger.info("SparkFE compute is done")
+    logger.info("Compute is done")
 
 
     if (config.getInstanceFormat.equals("parquet")) {

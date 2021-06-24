@@ -64,7 +64,7 @@ object WindowAggPlan {
     val windowAggConfig = WindowAggPlanUtil.createWindowAggConfig(ctx, physicalNode, isKeepIndexColumn)
     val hadoopConf = new SerializableConfiguration(
       ctx.getSparkSession.sparkContext.hadoopConfiguration)
-    val sparkFeConfig = ctx.getConf
+    val openmldbBatchConfig = ctx.getConf
     val dfWithIndex = inputTable.getDfConsideringIndex(ctx, physicalNode.GetNodeId())
 
     // Do union if physical node has union flag
@@ -96,8 +96,8 @@ object WindowAggPlan {
 
       val outputInternalRowRdd = zippedRdd.mapPartitionsWithIndex {
         case (partitionIndex, iter) =>
-          val computer = WindowAggPlanUtil.createComputer(partitionIndex, hadoopConf, sparkFeConfig, windowAggConfig)
-          unsafeWindowAggIter(computer, iter, sparkFeConfig, windowAggConfig, outputSchema)
+          val computer = WindowAggPlanUtil.createComputer(partitionIndex, hadoopConf, openmldbBatchConfig, windowAggConfig)
+          unsafeWindowAggIter(computer, iter, openmldbBatchConfig, windowAggConfig, outputSchema)
       }
       SparkUtil.RddInternalRowToDf(ctx.getSparkSession, outputInternalRowRdd, outputSchema)
 
@@ -105,14 +105,14 @@ object WindowAggPlan {
       val outputRdd = if (isWindowWithUnion) {
         repartitionDf.rdd.mapPartitionsWithIndex {
         case (partitionIndex, iter) =>
-          val computer = WindowAggPlanUtil.createComputer(partitionIndex, hadoopConf, sparkFeConfig, windowAggConfig)
-          windowAggIterWithUnionFlag(computer, iter, sparkFeConfig, windowAggConfig)
+          val computer = WindowAggPlanUtil.createComputer(partitionIndex, hadoopConf, openmldbBatchConfig, windowAggConfig)
+          windowAggIterWithUnionFlag(computer, iter, openmldbBatchConfig, windowAggConfig)
         }
       } else {
         repartitionDf.rdd.mapPartitionsWithIndex {
           case (partitionIndex, iter) =>
-            val computer = WindowAggPlanUtil.createComputer(partitionIndex, hadoopConf, sparkFeConfig, windowAggConfig)
-            windowAggIter(computer, iter, sparkFeConfig, windowAggConfig)
+            val computer = WindowAggPlanUtil.createComputer(partitionIndex, hadoopConf, openmldbBatchConfig, windowAggConfig)
+            windowAggIter(computer, iter, openmldbBatchConfig, windowAggConfig)
         }
       }
 

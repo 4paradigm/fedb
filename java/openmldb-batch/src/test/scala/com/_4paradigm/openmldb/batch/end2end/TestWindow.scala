@@ -17,6 +17,7 @@
 package com._4paradigm.openmldb.batch.end2end
 
 import com._4paradigm.openmldb.batch.api.OpenmldbSession
+import com._4paradigm.openmldb.batch.utils.SparkUtil
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, SparkSession}
 import org.scalatest.FunSuite
@@ -54,11 +55,9 @@ class TestWindow extends FunSuite {
     val sqlText = "SELECT sum(trans_amount) OVER w AS w_sum_amount FROM t1 WINDOW w AS (PARTITION BY user ORDER BY trans_time ROWS BETWEEN 10 PRECEDING AND CURRENT ROW)"
     val outputDf = sess.sql(sqlText)
 
-    sess.version()
-
-    //val sparksqlOutputDf = sess.sparksql(sqlText)
-    // Notice that the sum column type is different for SparkSQL and SparkFE
-    //assert(SparkUtil.approximateDfEqual(outputDf.getSparkDf(), sparksqlOutputDf, false))
+    val sparksqlOutputDf = sess.sparksql(sqlText)
+    // Notice that the sum column type is different for SparkSQL
+    assert(SparkUtil.approximateDfEqual(outputDf.getSparkDf(), sparksqlOutputDf, false))
   }
 
 }
