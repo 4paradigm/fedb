@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/slice.h"
+#include "base/time_series_pool.h"
 #include "gtest/gtest.h"
 
 namespace openmldb {
@@ -156,6 +157,45 @@ TEST_F(SkiplistTest, InsertAndIterator) {
         uint32_t key4 = 3;
         uint32_t value4 = 6;
         sl.Insert(key4, value4);
+        Skiplist<uint32_t, uint32_t, Comparator>::Iterator* it = sl.NewIterator();
+        it->Seek(0);
+        ASSERT_EQ(1, (signed)it->GetKey());
+        ASSERT_EQ(2, (signed)it->GetValue());
+        it->Next();
+        ASSERT_EQ(2, (signed)it->GetKey());
+        ASSERT_EQ(5, (signed)it->GetValue());
+        it->Next();
+        ASSERT_EQ(2, (signed)it->GetKey());
+        ASSERT_EQ(4, (signed)it->GetValue());
+        it->Next();
+        ASSERT_EQ(3, (signed)it->GetKey());
+        ASSERT_EQ(6, (signed)it->GetValue());
+        it->Next();
+        ASSERT_FALSE(it->Valid());
+        it->Seek(2);
+        ASSERT_EQ(2, (signed)it->GetKey());
+        ASSERT_EQ(5, (signed)it->GetValue());
+        delete it;
+    }
+}
+
+TEST_F(SkiplistTest, InsertAndIteratorWithPool) {
+    Comparator cmp;
+    TimeSeriesPool pool(1024);
+    for (auto height : vec) {
+        Skiplist<uint32_t, uint32_t, Comparator> sl(height, 4, cmp);
+        uint32_t key1 = 1;
+        uint32_t value1 = 2;
+        sl.Insert(key1, value1, 1, pool);
+        uint32_t key2 = 2;
+        uint32_t value2 = 4;
+        sl.Insert(key2, value2, 2, pool);
+        uint32_t key3 = 2;
+        uint32_t value3 = 5;
+        sl.Insert(key3, value3, 1, pool);
+        uint32_t key4 = 3;
+        uint32_t value4 = 6;
+        sl.Insert(key4, value4, 1, pool);
         Skiplist<uint32_t, uint32_t, Comparator>::Iterator* it = sl.NewIterator();
         it->Seek(0);
         ASSERT_EQ(1, (signed)it->GetKey());
@@ -661,6 +701,17 @@ TEST_F(SkiplistTest, Duplicate) {
     ASSERT_EQ(1, (signed)it->GetValue());
     it->Next();
     ASSERT_FALSE(it->Valid());
+}
+
+TEST_F(SkiplistTest, DuplicateWithPool) {
+    TimeSeriesPool pool(1024);
+    DescComparator cmp;
+    Skiplist<uint32_t, uint32_t, DescComparator> sl(12, 4, cmp);
+    uint32_t val = 1;
+    sl.Insert(1, val, 111, pool);
+    sl.Insert(2, val, 111, pool);
+    val = 2;
+    sl.Insert(1, val, 112, pool);
 }
 
 }  // namespace base

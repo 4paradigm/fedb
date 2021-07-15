@@ -119,6 +119,7 @@ DEFINE_uint32(recycle_ttl, 0, "ttl of recycle in minute");
 
 DEFINE_uint32(latest_ttl_max, 1000, "the max ttl of latest");
 DEFINE_uint32(absolute_ttl_max, 60 * 24 * 365 * 30, "the max ttl of absolute time");
+DEFINE_uint32(time_series_pool_block_size, 4 * 1024, "the block size of time series pool");
 DEFINE_uint32(skiplist_max_height, 12, "the max height of skiplist");
 DEFINE_uint32(key_entry_max_height, 8, "the max height of key entry");
 DEFINE_uint32(latest_default_skiplist_height, 1, "the default height of skiplist for latest table");

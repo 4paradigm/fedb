@@ -21,9 +21,9 @@
 #include <stdint.h>
 
 #include <atomic>
-#include <iostream>
 
 #include "base/random.h"
+#include "base/time_series_pool.h"
 
 namespace openmldb {
 namespace base {
@@ -43,6 +43,16 @@ struct DefaultComparator {
 template <class K, class V>
 class Node {
  public:
+    // Set data reference and Node height
+    Node(const K& key, V& value, uint8_t height, std::atomic<Node<K, V>*>* preAlloc)  // NOLINT
+        : height_(height), key_(key), value_(value) {
+        nexts_ = preAlloc;
+    }
+
+    Node(uint8_t height, std::atomic<Node<K, V>*>* preAlloc) : height_(height), key_(), value_() {  // NOLINT
+        nexts_ = preAlloc;
+    }
+
     // Set data reference and Node height
     Node(const K& key, V& value, uint8_t height)  // NOLINT
         : height_(height), key_(key), value_(value) {
@@ -94,13 +104,7 @@ template <class K, class V, class Comparator>
 class Skiplist {
  public:
     Skiplist(uint8_t max_height, uint8_t branch, const Comparator& compare)
-        : MaxHeight(max_height),
-          Branch(branch),
-          max_height_(0),
-          compare_(compare),
-          rand_(0xdeadbeef),
-          head_(NULL),
-          tail_(NULL) {
+        : MaxHeight(max_height), Branch(branch), max_height_(0), compare_(compare), rand_(0xdeadbeef), tail_(NULL) {
         head_ = new Node<K, V>(MaxHeight);
         for (uint8_t i = 0; i < head_->Height(); i++) {
             head_->SetNext(i, NULL);
@@ -121,6 +125,29 @@ class Skiplist {
             max_height_.store(height, std::memory_order_relaxed);
         }
         Node<K, V>* node = NewNode(key, value, height);
+        if (pre[0]->GetNext(0) == NULL) {
+            tail_.store(node, std::memory_order_release);
+        }
+        for (uint8_t i = 0; i < height; i++) {
+            node->SetNextNoBarrier(i, pre[i]->GetNextNoBarrier(i));
+            pre[i]->SetNext(i, node);
+        }
+        return height;
+    }
+
+    // Insert need external synchronized
+    // use if skiplist is using a pool
+    uint8_t Insert(const K& key, V& value, uint64_t time, TimeSeriesPool& pool) {  // NOLINT
+        uint8_t height = RandomHeight();
+        Node<K, V>* pre[MaxHeight];
+        FindLessOrEqual(key, pre);
+        if (height > GetMaxHeight()) {
+            for (uint8_t i = GetMaxHeight(); i < height; i++) {
+                pre[i] = head_;
+            }
+            max_height_.store(height, std::memory_order_relaxed);
+        }
+        Node<K, V>* node = NewNode(key, value, height, time, pool);
         if (pre[0]->GetNext(0) == NULL) {
             tail_.store(node, std::memory_order_release);
         }
@@ -269,6 +296,7 @@ class Skiplist {
     }
 
     // Need external synchronized
+    // called if skiplist is using tcalloc
     uint64_t Clear() {
         uint64_t cnt = 0;
         Node<K, V>* node = head_->GetNext(0);
@@ -289,6 +317,34 @@ class Skiplist {
             delete tmp;
         }
         return cnt;
+    }
+
+    // Need external synchronized
+    // use if skiplist is using a pool
+    bool AddToFirst(const K& key, V& value, uint64_t time, TimeSeriesPool& pool) {  // NOLINT
+        {
+            Node<K, V>* node = head_->GetNext(0);
+            if (node != NULL && compare_(key, node->GetKey()) > 0) {
+                return false;
+            }
+        }
+        uint8_t height = RandomHeight();
+        Node<K, V>* pre[MaxHeight];
+        for (uint8_t i = 0; i < height; i++) {
+            pre[i] = head_;
+        }
+        if (height > GetMaxHeight()) {
+            max_height_.store(height, std::memory_order_relaxed);
+        }
+        Node<K, V>* node = NewNode(key, value, height, time, pool);
+        if (pre[0]->GetNext(0) == NULL) {
+            tail_.store(node, std::memory_order_release);
+        }
+        for (uint8_t i = 0; i < height; i++) {
+            node->SetNextNoBarrier(i, pre[i]->GetNextNoBarrier(i));
+            pre[i]->SetNext(i, node);
+        }
+        return true;
     }
 
     // Need external synchronized
@@ -363,6 +419,14 @@ class Skiplist {
     Iterator* NewIterator() { return new Iterator(this); }
 
  private:
+    Node<K, V>* NewNode(const K& key, V& value, uint8_t height, uint64_t time, TimeSeriesPool& pool) {  // NOLINT
+        auto arrmemvptr = pool.Alloc(sizeof(std::atomic<Node<K, V>*>) * height, time);
+        auto arrmem = reinterpret_cast<std::atomic<Node<K, V>*>*>(arrmemvptr);
+        auto nodemem = pool.Alloc(sizeof(Node<K, V>), time);
+        Node<K, V>* node = new (nodemem) Node<K, V>(key, value, height, arrmem);
+        return node;
+    }
+
     Node<K, V>* NewNode(const K& key, V& value, uint8_t height) {  // NOLINT
         Node<K, V>* node = new Node<K, V>(key, value, height);
         return node;

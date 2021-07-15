@@ -24,6 +24,7 @@
 #include "storage/record.h"
 
 DECLARE_int32(gc_safe_offset);
+DECLARE_uint32(time_series_pool_block_size);
 DECLARE_uint32(skiplist_max_height);
 DECLARE_uint32(gc_deleted_pk_version_delta);
 
@@ -39,6 +40,8 @@ Segment::Segment()
       pk_cnt_(0),
       ts_cnt_(1),
       gc_version_(0),
+      pool_(FLAGS_time_series_pool_block_size),
+      boost_pool_(sizeof(KeyEntry)),
       ttl_offset_(FLAGS_gc_safe_offset * 60 * 1000) {
     entries_ = new KeyEntries((uint8_t)FLAGS_skiplist_max_height, 4, scmp);
     key_entry_max_height_ = (uint8_t)FLAGS_skiplist_max_height;
@@ -54,6 +57,8 @@ Segment::Segment(uint8_t height)
       key_entry_max_height_(height),
       ts_cnt_(1),
       gc_version_(0),
+      pool_(FLAGS_time_series_pool_block_size),
+      boost_pool_(sizeof(KeyEntry)),
       ttl_offset_(FLAGS_gc_safe_offset * 60 * 1000) {
     entries_ = new KeyEntries((uint8_t)FLAGS_skiplist_max_height, 4, scmp);
     entry_free_list_ = new KeyEntryNodeList(4, 4, tcmp);
@@ -68,6 +73,8 @@ Segment::Segment(uint8_t height, const std::vector<uint32_t>& ts_idx_vec)
       key_entry_max_height_(height),
       ts_cnt_(ts_idx_vec.size()),
       gc_version_(0),
+      pool_(FLAGS_time_series_pool_block_size),
+      boost_pool_(sizeof(KeyEntry)),
       ttl_offset_(FLAGS_gc_safe_offset * 60 * 1000) {
     entries_ = new KeyEntries((uint8_t)FLAGS_skiplist_max_height, 4, scmp);
     entry_free_list_ = new KeyEntryNodeList(4, 4, tcmp);
@@ -92,14 +99,14 @@ uint64_t Segment::Release() {
             if (ts_cnt_ > 1) {
                 KeyEntry** entry_arr = (KeyEntry**)it->GetValue();  // NOLINT
                 for (uint32_t i = 0; i < ts_cnt_; i++) {
-                    cnt += entry_arr[i]->Release();
-                    delete entry_arr[i];
+                    cnt += entry_arr[i]->Release(pool_);
+                    boost_pool_.free(entry_arr[i]);
                 }
                 delete[] entry_arr;
             } else {
                 KeyEntry* entry = (KeyEntry*)it->GetValue();  // NOLINT
-                cnt += entry->Release();
-                delete entry;
+                cnt += entry->Release(pool_);
+                boost_pool_.free(entry);
             }
         }
         it->Next();
@@ -115,14 +122,14 @@ uint64_t Segment::Release() {
         if (ts_cnt_ > 1) {
             KeyEntry** entry_arr = (KeyEntry**)node->GetValue();  // NOLINT
             for (uint32_t i = 0; i < ts_cnt_; i++) {
-                entry_arr[i]->Release();
-                delete entry_arr[i];
+                entry_arr[i]->Release(pool_);
+                boost_pool_.free(entry_arr[i]);
             }
             delete[] entry_arr;
         } else {
             KeyEntry* entry = (KeyEntry*)node->GetValue();  // NOLINT
-            entry->Release();
-            delete entry;
+            entry->Release(pool_);
+            boost_pool_.free(entry);
         }
         delete node;
         f_it->Next();
@@ -176,14 +183,15 @@ void Segment::Put(const Slice& key, uint64_t time, DataBlock* row) {
         memcpy(pk, key.data(), key.size());
         // need to delete memory when free node
         Slice skey(pk, key.size());
-        entry = (void*)new KeyEntry(key_entry_max_height_);  // NOLINT
+        entry = new (boost_pool_.malloc())KeyEntry(key_entry_max_height_);
+        // Key entry do not use pool
         uint8_t height = entries_->Insert(skey, entry);
         byte_size += GetRecordPkIdxSize(height, key.size(), key_entry_max_height_);
         pk_cnt_.fetch_add(1, std::memory_order_relaxed);
     }
     idx_cnt_.fetch_add(1, std::memory_order_relaxed);
-    uint8_t height = ((KeyEntry*)entry)->entries.Insert(time, row);  // NOLINT
-    ((KeyEntry*)entry)                                               // NOLINT
+    uint8_t height = ((KeyEntry*)entry)->entries.Insert(time, row, time, pool_);  // NOLINT
+    ((KeyEntry*)entry)                                                            // NOLINT
         ->count_.fetch_add(1, std::memory_order_relaxed);
     byte_size += GetRecordTsIdxSize(height);
     idx_byte_size_.fetch_add(byte_size, std::memory_order_relaxed);
@@ -224,16 +232,17 @@ void Segment::Put(const Slice& key, const TSDimensions& ts_dimension, DataBlock*
                 Slice skey(pk, key.size());
                 KeyEntry** entry_arr_tmp = new KeyEntry*[ts_cnt_];
                 for (uint32_t i = 0; i < ts_cnt_; i++) {
-                    entry_arr_tmp[i] = new KeyEntry(key_entry_max_height_);
+                    entry_arr_tmp[i] = new (boost_pool_.malloc())KeyEntry(key_entry_max_height_);
                 }
                 entry_arr = (void*)entry_arr_tmp;  // NOLINT
+                // key entry do not use pool
                 uint8_t height = entries_->Insert(skey, entry_arr);
                 byte_size += GetRecordPkMultiIdxSize(height, key.size(), key_entry_max_height_, ts_cnt_);
                 pk_cnt_.fetch_add(1, std::memory_order_relaxed);
             }
         }
         uint8_t height = ((KeyEntry**)entry_arr)[pos->second]->entries.Insert(  // NOLINT
-            cur_ts.ts(), row);
+            cur_ts.ts(), row, cur_ts.ts(), pool_);
         ((KeyEntry**)entry_arr)[pos->second]->count_.fetch_add(  // NOLINT
             1, std::memory_order_relaxed);
         byte_size += GetRecordTsIdxSize(height);
@@ -284,6 +293,7 @@ bool Segment::Delete(const Slice& key) {
     }
     {
         std::lock_guard<std::mutex> lock(gc_mu_);
+        // gc insert should not use timepool
         entry_free_list_->Insert(gc_version_.load(std::memory_order_relaxed), entry_node);
     }
     return true;
@@ -305,7 +315,9 @@ void Segment::FreeList(::openmldb::base::Node<uint64_t, DataBlock*>* node, uint6
             delete tmp->GetValue();
             gc_record_cnt++;
         }
-        delete tmp;
+        // changed to pool free (time entry)
+        pool_.Free(tmp->GetKey());
+        // delete tmp;
     }
 }
 
@@ -329,7 +341,7 @@ void Segment::FreeEntry(::openmldb::base::Node<Slice, void*>* entry_node, uint64
                 FreeList(data_node, gc_idx_cnt, gc_record_cnt, gc_record_byte_size);
             }
             delete it;
-            delete entry;
+            boost_pool_.free(entry);
             idx_cnt_vec_[i]->fetch_sub(gc_idx_cnt - old, std::memory_order_relaxed);
         }
         delete[] entry_arr;
@@ -347,7 +359,7 @@ void Segment::FreeEntry(::openmldb::base::Node<Slice, void*>* entry_node, uint64
             FreeList(data_node, gc_idx_cnt, gc_record_cnt, gc_record_byte_size);
         }
         delete it;
-        delete entry;
+        boost_pool_.free(entry);
         uint64_t byte_size =
             GetRecordPkIdxSize(entry_node->Height(), entry_node->GetKey().size(), key_entry_max_height_);
         idx_byte_size_.fetch_sub(byte_size, std::memory_order_relaxed);
@@ -365,9 +377,11 @@ void Segment::GcEntryFreeList(uint64_t version, uint64_t& gc_idx_cnt, uint64_t& 
     while (node != NULL) {
         ::openmldb::base::Node<Slice, void*>* entry_node = node->GetValue();
         FreeEntry(entry_node, gc_idx_cnt, gc_record_cnt, gc_record_byte_size);
+        // no change for key entry not using pool
         delete entry_node;
         ::openmldb::base::Node<uint64_t, ::openmldb::base::Node<Slice, void*>*>* tmp = node;
         node = node->GetNextNoBarrier(0);
+        // no change for gc not using pool
         delete tmp;
         pk_cnt_.fetch_sub(1, std::memory_order_relaxed);
     }
@@ -584,6 +598,7 @@ void Segment::GcAllType(const std::map<uint32_t, TTLSt>& ttl_st_map, uint64_t& g
             }
             if (entry_node != NULL) {
                 std::lock_guard<std::mutex> lock(gc_mu_);
+                // gc insert should not use timepool
                 entry_free_list_->Insert(gc_version_.load(std::memory_order_relaxed), entry_node);
             }
         }
@@ -632,6 +647,7 @@ void Segment::Gc4TTL(const uint64_t time, uint64_t& gc_idx_cnt, uint64_t& gc_rec
         }
         if (entry_node != NULL) {
             std::lock_guard<std::mutex> lock(gc_mu_);
+            // gc insert should not use timepool
             entry_free_list_->Insert(gc_version_.load(std::memory_order_relaxed), entry_node);
         }
         uint64_t entry_gc_idx_cnt = 0;
@@ -725,6 +741,7 @@ void Segment::Gc4TTLOrHead(const uint64_t time, const uint64_t keep_cnt, uint64_
         }
         if (entry_node != NULL) {
             std::lock_guard<std::mutex> lock(gc_mu_);
+            // gc insert should not use timepool
             entry_free_list_->Insert(gc_version_.load(std::memory_order_relaxed), entry_node);
         }
         uint64_t entry_gc_idx_cnt = 0;

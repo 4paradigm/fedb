@@ -23,8 +23,11 @@
 #include <mutex>  // NOLINT
 #include <vector>
 
+#include "boost/pool/pool.hpp"
+
 #include "base/skiplist.h"
 #include "base/slice.h"
+#include "base/time_series_pool.h"
 #include "proto/tablet.pb.h"
 #include "storage/iterator.h"
 #include "storage/schema.h"
@@ -95,7 +98,7 @@ class KeyEntry {
     ~KeyEntry() {}
 
     // just return the count of datablock
-    uint64_t Release() {
+    uint64_t Release(::openmldb::base::TimeSeriesPool& pool) {
         uint64_t cnt = 0;
         TimeEntries::Iterator* it = entries.NewIterator();
         it->SeekToFirst();
@@ -108,9 +111,11 @@ class KeyEntry {
             } else {
                 delete block;
             }
+            pool.Free(it->GetKey());
             it->Next();
         }
-        entries.Clear();
+        // not clearing for using pool for time entry
+        // entries.Clear();
         delete it;
         return cnt;
     }
@@ -251,11 +256,13 @@ class Segment {
     std::atomic<uint64_t> idx_byte_size_;
     std::atomic<uint64_t> pk_cnt_;
     uint8_t key_entry_max_height_;
-    KeyEntryNodeList* entry_free_list_;
+    KeyEntryNodeList* entry_free_list_;  // NOTE: entry free list DO NOT use pool
     uint32_t ts_cnt_;
     std::atomic<uint64_t> gc_version_;
     std::map<uint32_t, uint32_t> ts_idx_map_;
     std::vector<std::shared_ptr<std::atomic<uint64_t>>> idx_cnt_vec_;
+    ::openmldb::base::TimeSeriesPool pool_;
+    boost::pool<> boost_pool_;
     uint64_t ttl_offset_;
 };
 
