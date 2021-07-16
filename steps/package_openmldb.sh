@@ -19,11 +19,7 @@
 
 WORKDIR=`pwd`
 set -e
-ln -sf /usr/workdir/thirdparty thirdparty  || :
-ln -sf /usr/workdir/thirdsrc thirdsrc || :
-sed -i /[:blank:]*version/s/1.0/$1/ python/setup.py || :
-
-package=fedb-cluster-$1
+package=openmldb-$1-linux
 rm -rf ${package} || :
 mkdir ${package} || :
 cp -r release/conf ${package}/conf
@@ -31,16 +27,19 @@ cp -r release/bin ${package}/bin
 IP=127.0.0.1
 sed -i "s/--endpoint=.*/--endpoint=${IP}:6527/g" ${package}/conf/nameserver.flags
 sed -i "s/--zk_cluster=.*/--zk_cluster=${IP}:2181/g" ${package}/conf/nameserver.flags
-sed -i "s/--zk_root_path=.*/--zk_root_path=\/fedb/g" ${package}/conf/nameserver.flags
+sed -i "s/--zk_root_path=.*/--zk_root_path=\/openmldb/g" ${package}/conf/nameserver.flags
 
 sed -i "s/--endpoint=.*/--endpoint=${IP}:9527/g" ${package}/conf/tablet.flags
 sed -i "s/#--zk_cluster=.*/--zk_cluster=${IP}:2181/g" ${package}/conf/tablet.flags
-sed -i "s/#--zk_root_path=.*/--zk_root_path=\/fedb/g" ${package}/conf/tablet.flags
+sed -i "s/#--zk_root_path=.*/--zk_root_path=\/openmldb/g" ${package}/conf/tablet.flags
+
+sed -i "s/#--zk_cluster=.*/--zk_cluster=${IP}:2181/g" ${package}/conf/apiserver.flags
+sed -i "s/#--zk_root_path=.*/--zk_root_path=\/openmldb/g" ${package}/conf/apiserver.flags
 
 cp -r tools ${package}/tools
 ls -l build/bin/
-cp -r build/bin/fedb ${package}/bin/fedb
-test -e build/bin/fedb_mac &&  cp -r build/bin/fedb_mac ${package}/bin/fedb_mac_cli
+cp -r build/bin/openmldb ${package}/bin/openmldb
+test -e build/bin/openmldb_mac &&  cp -r build/bin/openmldb_mac ${package}/bin/openmldb_mac_cli
 cd ${package}/bin
 cd ../..
 tar -cvzf ${package}.tar.gz ${package}

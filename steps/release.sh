@@ -26,11 +26,11 @@ do
     then
         case "$i" in 
             "1")
-                sed -i 's/FEDB_VERSION_MAJOR .*/FEDB_VERSION_MAJOR '${value}')/g' ${cmake_file};;
+                sed -i 's/OPENMLDB_VERSION_MAJOR .*/OPENMLDB_VERSION_MAJOR '${value}')/g' ${cmake_file};;
             "2")
-                sed -i 's/FEDB_VERSION_MINOR .*/FEDB_VERSION_MINOR '${value}')/g' ${cmake_file};;
+                sed -i 's/OPENMLDB_VERSION_MINOR .*/OPENMLDB_VERSION_MINOR '${value}')/g' ${cmake_file};;
             "3")
-                sed -i 's/FEDB_VERSION_BUG .*/FEDB_VERSION_BUG '${value}')/g' ${cmake_file};;
+                sed -i 's/OPENMLDB_VERSION_BUG .*/OPENMLDB_VERSION_BUG '${value}')/g' ${cmake_file};;
             *)
                 echo "xx";;
         esac        

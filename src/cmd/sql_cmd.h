@@ -46,17 +46,19 @@ namespace openmldb {
 namespace cmd {
 using hybridse::plan::PlanAPI;
 const std::string LOGO =  // NOLINT
-    ""
-    "  ______   _____  ___\n"
-    " |  ____|  |  __ \\|  _ \\\n"
-    " | |__ ___ | |  | | |_) |\n"
-    " |  __/ _  \\ |  | |  _ <\n"
-    " | | |  __ / |__| | |_) |\n"
-    " |_|  \\___||_____/|____/\n";
+
+    "  _____                    ______  _       _____   ______   \n"
+    " / ___ \\                  |  ___ \\| |     (____ \\ (____  \\  \n"
+    "| |   | |____   ____ ____ | | _ | | |      _   \\ \\ ____)  ) \n"
+    "| |   | |  _ \\ / _  )  _ \\| || || | |     | |   | |  __  (  \n"
+    "| |___| | | | ( (/ /| | | | || || | |_____| |__/ /| |__)  ) \n"
+    " \\_____/| ||_/ \\____)_| |_|_||_||_|_______)_____/ |______/  \n"
+    "        |_|                                                 \n";
+
 
 const std::string VERSION = std::to_string(OPENMLDB_VERSION_MAJOR) + "." +  // NOLINT
                             std::to_string(OPENMLDB_VERSION_MINOR) + "." + std::to_string(OPENMLDB_VERSION_BUG) + "." +
-                            OPENMLDB_COMMIT_ID + "." + HYBRIDSE_COMMIT_ID;
+                            OPENMLDB_COMMIT_ID;
 
 std::string db = "";  // NOLINT
 ::openmldb::sdk::ClusterSDK *cs = NULL;

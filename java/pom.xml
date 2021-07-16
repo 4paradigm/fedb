@@ -8,11 +8,36 @@
     <packaging>pom</packaging>
     <name>openmldb</name>
     <!-- Use the version from different profile -->
-    <version>${projectVersionFromProfile}</version>
+    <version>0.1.5-pre-5</version>
     <modules>
         <module>openmldb-jdbc</module>
         <module>openmldb-native</module>
     </modules>
+    <description>OpenMLDB is an open-source database that is designed and optimized to enable data integrity and efficiency for machine learning driven applications. In addition to 10x faster ML application landing experience, OpenMLDB provides unified computing and storage engines to reduce the complexity and cost of development and operation.</description>
+    <url>https://github.com/4paradigm/OpenMLDB</url>
+     <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>dl239</id>
+            <name>jeremy</name>
+            <email>denglong@4paradigm.com</email>
+            <url>https://github.com/dl239</url>
+            <organization>4Paradigm</organization>
+            <organizationUrl>https://www.4paradigm.com/</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git@github.com:4paradigm/OpenMLDB.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:4paradigm/OpenMLDB.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/4paradigm/OpenMLDB</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,7 +52,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- Set the default project version -->
-        <default.project.version>0.1.0-SNAPSHOT</default.project.version>
+        <default.project.version>0.1.5-pre-3</default.project.version>
         <default.hybridse.common.version>0.1.0-SNAPSHOT</default.hybridse.common.version>
     </properties>
 
@@ -584,14 +609,5 @@
         <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>github</id>
-            <name>4Paradigm-maven-repository</name>
-            <url>http://103.3.60.66:8001/</url>
-        </repository>
-    </repositories>
-
 </project>
 

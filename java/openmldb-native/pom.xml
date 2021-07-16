@@ -5,42 +5,18 @@
     <parent>
         <artifactId>openmldb-parent</artifactId>
         <groupId>com.4paradigm.openmldb</groupId>
-        <version>${projectVersionFromProfile}</version>
+        <version>0.1.5-pre-5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>openmldb-native</artifactId>
     <packaging>jar</packaging>
     <name>openmldb-native</name>
-    <version>${projectVersionFromProfile}</version>
+    <version>0.1.5-pre-5</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <versionFromProfile>${project.version.base}${project.version.suffix}</versionFromProfile>
-            </properties>
-        </profile>
-        <profile>
-            <id>macos</id>
-            <properties>
-                <versionFromProfile>${project.version.base}-macos${project.version.suffix}</versionFromProfile>
-            </properties>
-        </profile>
-        <profile>
-            <id>allinone</id>
-            <properties>
-                <versionFromProfile>${project.version.base}-allinone${project.version.suffix}</versionFromProfile>
-            </properties>
-        </profile>
-    </profiles>
 
     <dependencies>
        <dependency>
