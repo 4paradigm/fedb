@@ -1869,23 +1869,23 @@ cases:
           - [5, 1, "d", 5, 35, 1.5, 2.5, 1590738994000, "2020-05-04", false]
     sql: |
       SELECT {0}.id,
-          lead(c1, 0) OVER w1 as m1,
-          lead(c1, 2) OVER w1 as m2,
-          lead(c2, 0) OVER w1 as m3,
-          lead(c2, 2) OVER w1 as m4,
-          lead(c3, 0) OVER w1 as m5,
-          lead(c3, 2) OVER w1 as m6,
-          lead(c4, 0) OVER w1 as m7,
-          lead(c4, 2) OVER w1 as m8,
-          lead(c5, 0) OVER w1 as m9,
-          lead(c5, 2) OVER w1 as m10,
-          lead(c6, 0) OVER w1 as m11,
-          lead(c6, 2) OVER w1 as m12,
-          lead(c7, 0) OVER w1 as m13,
-          lead(c7, 2) OVER w1 as m14,
-          lead(c8, 0) OVER w1 as m15,
-          lead(c8, 2) OVER w1 as m16,
-          lead(pk, -1) OVER w1 as m17
+          lag(c1, 0) OVER w1 as m1,
+          lag(c1, 2) OVER w1 as m2,
+          lag(c2, 0) OVER w1 as m3,
+          lag(c2, 2) OVER w1 as m4,
+          lag(c3, 0) OVER w1 as m5,
+          lag(c3, 2) OVER w1 as m6,
+          lag(c4, 0) OVER w1 as m7,
+          lag(c4, 2) OVER w1 as m8,
+          lag(c5, 0) OVER w1 as m9,
+          lag(c5, 2) OVER w1 as m10,
+          lag(c6, 0) OVER w1 as m11,
+          lag(c6, 2) OVER w1 as m12,
+          lag(c7, 0) OVER w1 as m13,
+          lag(c7, 2) OVER w1 as m14,
+          lag(c8, 0) OVER w1 as m15,
+          lag(c8, 2) OVER w1 as m16,
+          lag(pk, -1) OVER w1 as m17
       FROM {0} WINDOW
       w1 AS (PARTITION BY {0}.pk ORDER BY {0}.c6 ROWS BETWEEN 2 PRECEDING AND CURRENT ROW);
     expect:
@@ -1966,8 +1966,8 @@ cases:
           - [14, 0, "a"]
     sql: |
       SELECT {0}.id,
-        count_where(id, ifnull(c1, "a") = ifnull(lead(c1, 0), "a")) OVER w1 AS count_where_w1,
-        count_where(id, ifnull(c1, "a") = ifnull(lead(c1, 0), "a")) OVER w2 AS count_where_w2
+        count_where(id, ifnull(c1, "a") = ifnull(lag(c1, 0), "a")) OVER w1 AS count_where_w1,
+        count_where(id, ifnull(c1, "a") = ifnull(lag(c1, 0), "a")) OVER w2 AS count_where_w2
       FROM {0}
       WINDOW w1 AS (PARTITION BY {0}.pk ORDER BY {0}.id ROWS BETWEEN 10 PRECEDING AND CURRENT ROW),
       w2 AS (PARTITION BY {0}.pk ORDER BY {0}.id ROWS_RANGE BETWEEN 100s PRECEDING AND CURRENT ROW);
@@ -2011,8 +2011,8 @@ cases:
           - [14, 0, "a"]
     sql: |
       SELECT {0}.id,
-        case when !isnull(lead(c1,0)) OVER w1 then count_where(id, c1 = lead(c1, 0)) OVER w1 else null end AS count_where_w1,
-        case when !isnull(lead(c1,0)) OVER w2 then count_where(id, c1 = lead(c1, 0)) OVER w2 else null end AS count_where_w2
+        case when !isnull(lag(c1,0)) OVER w1 then count_where(id, c1 = lag(c1, 0)) OVER w1 else null end AS count_where_w1,
+        case when !isnull(lag(c1,0)) OVER w2 then count_where(id, c1 = lag(c1, 0)) OVER w2 else null end AS count_where_w2
       FROM {0}
       WINDOW w1 AS (PARTITION BY {0}.pk ORDER BY {0}.id ROWS BETWEEN 10 PRECEDING AND CURRENT ROW),
       w2 AS (PARTITION BY {0}.pk ORDER BY {0}.id ROWS_RANGE BETWEEN 100s PRECEDING AND CURRENT ROW);

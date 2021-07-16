@@ -83,17 +83,17 @@ cases:
         sum(`zSWihsperNum`) over flattenRequest_zChannel_eventTime_0s_172801s as flattenRequest_zSWihsperNum_window_sum_80,
         avg(`uWatchAvgLength`) over flattenRequest_uUserId_eventTime_0_10 as flattenRequest_uWatchAvgLength_window_avg_81,
 
-        case when !isnull(lead(`zUserId`, 0)) over flattenRequest_uUserId_eventTime_0s_36001s then count(`zUserId`) over flattenRequest_uUserId_eventTime_0s_36001s else null end as flattenRequest_zUserId_window_count_82,
-        case when !isnull(lead(`zUserId`, 0)) over flattenRequest_uUserId_eventTime_0s_172801s then count(`zUserId`) over flattenRequest_uUserId_eventTime_0s_172801s else null end as flattenRequest_zUserId_window_count_83,
-        case when !isnull(lead(`zUserId`, 0)) over flattenRequest_uSex_eventTime_0_10 then count(`zUserId`) over flattenRequest_uSex_eventTime_0_10 else null end as flattenRequest_zUserId_window_count_84,
-        case when !isnull(lead(`zUserId`, 0)) over flattenRequest_uUserId_eventTime_0_10 then count(`zUserId`) over flattenRequest_uUserId_eventTime_0_10 else null end as flattenRequest_zUserId_window_count_85,
-        case when !isnull(lead(`uUserId`, 0)) over flattenRequest_zUserId_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_zUserId_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_86,
-        case when !isnull(lead(`uUserId`, 0)) over flattenRequest_zUserId_eventTime_0s_172801s then count(`uUserId`) over flattenRequest_zUserId_eventTime_0s_172801s else null end as flattenRequest_uUserId_window_count_87,
-        case when !isnull(lead(`uUserId`, 0)) over flattenRequest_uPlayGame_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_uPlayGame_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_88,
-        case when !isnull(lead(`uUserId`, 0)) over flattenRequest_uHasJoinedGroup_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_uHasJoinedGroup_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_89,
-        case when !isnull(lead(`uUserId`, 0)) over flattenRequest_uHasJoinedGroup_eventTime_0s_172801s then count(`uUserId`) over flattenRequest_uHasJoinedGroup_eventTime_0s_172801s else null end as flattenRequest_uUserId_window_count_90,
-        case when !isnull(lead(`uUserId`, 0)) over flattenRequest_uSex_eventTime_0s_172801s then count(`uUserId`) over flattenRequest_uSex_eventTime_0s_172801s else null end as flattenRequest_uUserId_window_count_91,
-        case when !isnull(lead(`uUserId`, 0)) over flattenRequest_uSex_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_uSex_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_92
+        case when !isnull(lag(`zUserId`, 0)) over flattenRequest_uUserId_eventTime_0s_36001s then count(`zUserId`) over flattenRequest_uUserId_eventTime_0s_36001s else null end as flattenRequest_zUserId_window_count_82,
+        case when !isnull(lag(`zUserId`, 0)) over flattenRequest_uUserId_eventTime_0s_172801s then count(`zUserId`) over flattenRequest_uUserId_eventTime_0s_172801s else null end as flattenRequest_zUserId_window_count_83,
+        case when !isnull(lag(`zUserId`, 0)) over flattenRequest_uSex_eventTime_0_10 then count(`zUserId`) over flattenRequest_uSex_eventTime_0_10 else null end as flattenRequest_zUserId_window_count_84,
+        case when !isnull(lag(`zUserId`, 0)) over flattenRequest_uUserId_eventTime_0_10 then count(`zUserId`) over flattenRequest_uUserId_eventTime_0_10 else null end as flattenRequest_zUserId_window_count_85,
+        case when !isnull(lag(`uUserId`, 0)) over flattenRequest_zUserId_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_zUserId_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_86,
+        case when !isnull(lag(`uUserId`, 0)) over flattenRequest_zUserId_eventTime_0s_172801s then count(`uUserId`) over flattenRequest_zUserId_eventTime_0s_172801s else null end as flattenRequest_uUserId_window_count_87,
+        case when !isnull(lag(`uUserId`, 0)) over flattenRequest_uPlayGame_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_uPlayGame_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_88,
+        case when !isnull(lag(`uUserId`, 0)) over flattenRequest_uHasJoinedGroup_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_uHasJoinedGroup_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_89,
+        case when !isnull(lag(`uUserId`, 0)) over flattenRequest_uHasJoinedGroup_eventTime_0s_172801s then count(`uUserId`) over flattenRequest_uHasJoinedGroup_eventTime_0s_172801s else null end as flattenRequest_uUserId_window_count_90,
+        case when !isnull(lag(`uUserId`, 0)) over flattenRequest_uSex_eventTime_0s_172801s then count(`uUserId`) over flattenRequest_uSex_eventTime_0s_172801s else null end as flattenRequest_uUserId_window_count_91,
+        case when !isnull(lag(`uUserId`, 0)) over flattenRequest_uSex_eventTime_0s_36001s then count(`uUserId`) over flattenRequest_uSex_eventTime_0s_36001s else null end as flattenRequest_uUserId_window_count_92
     from
         `flattenRequest`
         window flattenRequest_uUserId_eventTime_0_10 as (partition by `uUserId` order by `eventTime` rows between 10 preceding and 0 preceding),

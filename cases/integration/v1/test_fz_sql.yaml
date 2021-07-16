@@ -28,9 +28,9 @@ cases:
           - [5, 0, "k5:v5,k5:v3"]
     sql: |
       SELECT id,
-        identity(case when !isnull(lead(c1, 0)) then distinct_count(fz_window_split(c1,  ",")) else null end) over w1 as table_2_kn_0,
-        identity(case when !isnull(lead(c1, 0)) then distinct_count(fz_window_split_by_key(c1,  ",",  ":")) else null end) over w1 as table_2_kn_1,
-        identity(case when !isnull(lead(c1, 0)) then distinct_count(fz_window_split_by_value(c1,  ",",  ":")) else null end) over w1 as table_2_kn_2,
+        identity(case when !isnull(lag(c1, 0)) then distinct_count(fz_window_split(c1,  ",")) else null end) over w1 as table_2_kn_0,
+        identity(case when !isnull(lag(c1, 0)) then distinct_count(fz_window_split_by_key(c1,  ",",  ":")) else null end) over w1 as table_2_kn_1,
+        identity(case when !isnull(lag(c1, 0)) then distinct_count(fz_window_split_by_value(c1,  ",",  ":")) else null end) over w1 as table_2_kn_2,
         fz_join(fz_window_split(c1, ","), " ") OVER w1 AS split_and_join,
         fz_join(fz_window_split_by_key(c1, ",", ":"), " ") OVER w1 AS split_key_and_join,
         fz_join(fz_window_split_by_value(c1, ",", ":"), " ") OVER w1 AS split_value_and_join,
@@ -109,7 +109,7 @@ cases:
       select reqId_1, reqId_243 from  ( select     reqId as reqId_1 from {0} ) as out0 last join
       ( select
       reqId as reqId_243,
-      case when !isnull(lead(NAME_CLIENT_TYPE, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_CLIENT_TYPE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as f1,
+      case when !isnull(lag(NAME_CLIENT_TYPE, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_CLIENT_TYPE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as f1,
       1 as f2,
       fz_topn_frequency(NAME_CONTRACT_STATUS, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as f3,
       distinct_count(NAME_CONTRACT_TYPE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as f4,
@@ -117,24 +117,24 @@ cases:
       fz_topn_frequency(NAME_GOODS_CATEGORY, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as f6,
       distinct_count(NAME_GOODS_CATEGORY) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as f7,
       fz_topn_frequency(NAME_PAYMENT_TYPE, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as f8,
-      case when !isnull(lead(NAME_PAYMENT_TYPE, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_PAYMENT_TYPE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as f9,
+      case when !isnull(lag(NAME_PAYMENT_TYPE, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_PAYMENT_TYPE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as f9,
       distinct_count(NAME_PORTFOLIO) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as f10,
       fz_topn_frequency(NAME_PORTFOLIO, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_NAME_PORTFOLIO_multi_top3frequency_299,
       distinct_count(NAME_PRODUCT_TYPE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_NAME_PRODUCT_TYPE_multi_unique_count_300,
       fz_topn_frequency(NAME_PRODUCT_TYPE, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_NAME_PRODUCT_TYPE_multi_top3frequency_301,
       fz_topn_frequency(NAME_SELLER_INDUSTRY, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_NAME_SELLER_INDUSTRY_multi_top3frequency_302,
-      case when !isnull(lead(NAME_SELLER_INDUSTRY, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_SELLER_INDUSTRY) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_NAME_SELLER_INDUSTRY_multi_count_303,
+      case when !isnull(lag(NAME_SELLER_INDUSTRY, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_SELLER_INDUSTRY) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_NAME_SELLER_INDUSTRY_multi_count_303,
       fz_topn_frequency(NAME_TYPE_SUITE, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_NAME_TYPE_SUITE_multi_top3frequency_304,
-      case when !isnull(lead(NAME_TYPE_SUITE, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_TYPE_SUITE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_NAME_TYPE_SUITE_multi_count_305,
+      case when !isnull(lag(NAME_TYPE_SUITE, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_TYPE_SUITE) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_NAME_TYPE_SUITE_multi_count_305,
       fz_topn_frequency(NAME_YIELD_GROUP, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_NAME_YIELD_GROUP_multi_top3frequency_306,
-      case when !isnull(lead(NAME_YIELD_GROUP, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_YIELD_GROUP) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_NAME_YIELD_GROUP_multi_count_307,
+      case when !isnull(lag(NAME_YIELD_GROUP, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(NAME_YIELD_GROUP) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_NAME_YIELD_GROUP_multi_count_307,
       fz_topn_frequency(PRODUCT_COMBINATION, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_PRODUCT_COMBINATION_multi_top3frequency_308,
-      case when !isnull(lead(PRODUCT_COMBINATION, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(PRODUCT_COMBINATION) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_PRODUCT_COMBINATION_multi_count_309,
+      case when !isnull(lag(PRODUCT_COMBINATION, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(PRODUCT_COMBINATION) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_PRODUCT_COMBINATION_multi_count_309,
       fz_topn_frequency(SK_ID_PREV, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_SK_ID_PREV_multi_top3frequency_310,
       distinct_count(SK_ID_PREV) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_SK_ID_PREV_multi_unique_count_311,
       fz_topn_frequency(WEEKDAY_APPR_PROCESS_START, 3) over previous_application_SK_ID_CURR_ingestionTime_0s_32d as previous_application_WEEKDAY_APPR_PROCESS_START_multi_top3frequency_312,
 
-      case when !isnull(lead(WEEKDAY_APPR_PROCESS_START, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(WEEKDAY_APPR_PROCESS_START) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_WEEKDAY_APPR_PROCESS_START_multi_count_313
+      case when !isnull(lag(WEEKDAY_APPR_PROCESS_START, 1)) over previous_application_SK_ID_CURR_ingestionTime_0s_32d then count(WEEKDAY_APPR_PROCESS_START) over previous_application_SK_ID_CURR_ingestionTime_0s_32d else null end as previous_application_WEEKDAY_APPR_PROCESS_START_multi_count_313
       from
       (select eventTime as ingestionTime, timestamp('2019-07-18 09:20:20') as eventTime, '' as SK_ID_PREV,
       SK_ID_CURR as SK_ID_CURR, '' as NAME_CONTRACT_TYPE, double(0) as AMT_ANNUITY, double(0) as AMT_APPLICATION,

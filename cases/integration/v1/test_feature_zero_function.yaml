@@ -28,9 +28,9 @@ cases:
           - [5, 0, "k5:v5,k5:v3"]
     sql: |
       SELECT id,
-        identity(case when !isnull(lead(c1, 0)) then distinct_count(fz_window_split(c1,  ",")) else null end) over w1 as table_2_kn_0,
-        identity(case when !isnull(lead(c1, 0)) then distinct_count(fz_window_split_by_key(c1,  ",",  ":")) else null end) over w1 as table_2_kn_1,
-        identity(case when !isnull(lead(c1, 0)) then distinct_count(fz_window_split_by_value(c1,  ",",  ":")) else null end) over w1 as table_2_kn_2,
+        identity(case when !isnull(lag(c1, 0)) then distinct_count(fz_window_split(c1,  ",")) else null end) over w1 as table_2_kn_0,
+        identity(case when !isnull(lag(c1, 0)) then distinct_count(fz_window_split_by_key(c1,  ",",  ":")) else null end) over w1 as table_2_kn_1,
+        identity(case when !isnull(lag(c1, 0)) then distinct_count(fz_window_split_by_value(c1,  ",",  ":")) else null end) over w1 as table_2_kn_2,
         fz_join(fz_window_split(c1, ","), " ") OVER w1 AS split_and_join,
         fz_join(fz_window_split_by_key(c1, ",", ":"), " ") OVER w1 AS split_key_and_join,
         fz_join(fz_window_split_by_value(c1, ",", ":"), " ") OVER w1 AS split_value_and_join,

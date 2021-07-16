@@ -476,9 +476,9 @@ cases:
           c1,
           min(c1) over table_1_s2_t1 as table_1_c1_9,
           min(c2) over table_1_s2_t1 as table_1_c2_10,
-          identity(case when lead(d1, 1) != null then distinct_count(d1) else null end) over table_1_s2_t1 as table_1_d1_11,
-          identity(case when lead(d2, 1) != null then distinct_count(d2) else null end) over table_1_s2_t1 as table_1_d2_12,
-          identity(case when lead(s1, 1) != null then distinct_count(s1) else null end) over table_1_s2_t1 as table_1_s1_13
+          identity(case when lag(d1, 1) != null then distinct_count(d1) else null end) over table_1_s2_t1 as table_1_d1_11,
+          identity(case when lag(d2, 1) != null then distinct_count(d2) else null end) over table_1_s2_t1 as table_1_d2_12,
+          identity(case when lag(s1, 1) != null then distinct_count(s1) else null end) over table_1_s2_t1 as table_1_s1_13
       from
           {0} as main
           window table_1_s2_t1 as (partition by s2 order by t1 rows_range between 1d preceding and 0s preceding INSTANCE_NOT_IN_WINDOW);
@@ -518,9 +518,9 @@ cases:
           c1,
           min(c1) over table_1_s2_t1 as table_1_c1_9,
           min(c2) over table_1_s2_t1 as table_1_c2_10,
-          case when !isnull(lead(d1, 1) over table_1_s2_t1) then distinct_count(d1) over table_1_s2_t1 else null end as table_1_d1_11,
-          case when !isnull(lead(d2, 1) over table_1_s2_t1) then distinct_count(d2) over table_1_s2_t1 else null end as table_1_d2_12,
-          case when !isnull(lead(s1, 1) over table_1_s2_t1) then distinct_count(s1) over table_1_s2_t1 else null end as table_1_s1_13
+          case when !isnull(lag(d1, 1) over table_1_s2_t1) then distinct_count(d1) over table_1_s2_t1 else null end as table_1_d1_11,
+          case when !isnull(lag(d2, 1) over table_1_s2_t1) then distinct_count(d2) over table_1_s2_t1 else null end as table_1_d2_12,
+          case when !isnull(lag(s1, 1) over table_1_s2_t1) then distinct_count(s1) over table_1_s2_t1 else null end as table_1_s1_13
       from
           {0} as main
           window table_1_s2_t1 as (partition by s2 order by t1 rows_range between 1d preceding and 0s preceding INSTANCE_NOT_IN_WINDOW);

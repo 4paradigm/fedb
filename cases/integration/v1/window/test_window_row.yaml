@@ -590,7 +590,7 @@ cases:
           - ["bb",24,34,1.5,2.5,1590738994000,"2020-05-05"]
     sql: |
       SELECT c1, c4,
-      case when lead(c1, 0) OVER w1 == "aa" then sum(c4) over w1
+      case when lag(c1, 0) OVER w1 == "aa" then sum(c4) over w1
       else null end
       as sum_c1_w1 FROM {0}
       WINDOW w1 AS (PARTITION BY {0}.c1 ORDER BY {0}.c7 ROWS BETWEEN 2 PRECEDING AND CURRENT ROW);
@@ -618,7 +618,7 @@ cases:
           - ["bb",24,34,1.5,2.5,1590738994000,"2020-05-05"]
     sql: |
       SELECT c1, c4,
-      case when lead(c1, 0) OVER w1 == "aa" then sum(c4) over w1
+      case when lag(c1, 0) OVER w1 == "aa" then sum(c4) over w1
       else min(c4) over w1 end
       as sum_c1_w1 FROM {0}
       WINDOW w1 AS (PARTITION BY {0}.c1 ORDER BY {0}.c7 ROWS BETWEEN 2 PRECEDING AND CURRENT ROW);

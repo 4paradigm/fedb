@@ -65,14 +65,14 @@ cases:
         fz_top1_ratio(`f_cId`) over flattenRequest_f_requestId_eventTime_0_10 as flattenRequest_f_cId_window_top1_ratio_39,
         fz_top1_ratio(`f_cId`) over flattenRequest_f_requestId_eventTime_0s_604801s as flattenRequest_f_cId_window_top1_ratio_40,
         sum(`f_cLength`) over flattenRequest_f_requestId_eventTime_0s_432001s as flattenRequest_f_cLength_window_sum_41,
-        case when !isnull(lead(`f_cSrc`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cSrc`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cSrc_window_count_42,
-        case when !isnull(lead(`f_cSrc`, 0)) over flattenRequest_f_uId_eventTime_0s_604801s then count(`f_cSrc`) over flattenRequest_f_uId_eventTime_0s_604801s else null end as flattenRequest_f_cSrc_window_count_43,
+        case when !isnull(lag(`f_cSrc`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cSrc`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cSrc_window_count_42,
+        case when !isnull(lag(`f_cSrc`, 0)) over flattenRequest_f_uId_eventTime_0s_604801s then count(`f_cSrc`) over flattenRequest_f_uId_eventTime_0s_604801s else null end as flattenRequest_f_cSrc_window_count_43,
         fz_top1_ratio(`f_cId`) over flattenRequest_f_uId_eventTime_0_10 as flattenRequest_f_cId_window_top1_ratio_44,
         fz_top1_ratio(`f_cId`) over flattenRequest_f_uId_eventTime_0s_604801s as flattenRequest_f_cId_window_top1_ratio_45,
         fz_top1_ratio(`f_cId`) over flattenRequest_f_uId_eventTime_0s_432001s as flattenRequest_f_cId_window_top1_ratio_46,
-        case when !isnull(lead(`f_cId`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cId`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cId_window_count_47,
-        case when !isnull(lead(`f_cId`, 0)) over flattenRequest_f_uId_eventTime_0s_432001s then count(`f_cId`) over flattenRequest_f_uId_eventTime_0s_432001s else null end as flattenRequest_f_cId_window_count_48,
-        case when !isnull(lead(`f_cId`, 0)) over flattenRequest_f_uId_eventTime_0s_604801s then count(`f_cId`) over flattenRequest_f_uId_eventTime_0s_604801s else null end as flattenRequest_f_cId_window_count_49
+        case when !isnull(lag(`f_cId`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cId`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cId_window_count_47,
+        case when !isnull(lag(`f_cId`, 0)) over flattenRequest_f_uId_eventTime_0s_432001s then count(`f_cId`) over flattenRequest_f_uId_eventTime_0s_432001s else null end as flattenRequest_f_cId_window_count_48,
+        case when !isnull(lag(`f_cId`, 0)) over flattenRequest_f_uId_eventTime_0s_604801s then count(`f_cId`) over flattenRequest_f_uId_eventTime_0s_604801s else null end as flattenRequest_f_cId_window_count_49
     from
         `flattenRequest`
         window flattenRequest_f_requestId_eventTime_0s_604801s as (partition by `f_requestId` order by `eventTime` rows_range between 604801s preceding and 0s preceding),
@@ -129,8 +129,8 @@ cases:
           0.66445182724252494,
           0.66445182724252494,
           301.000000,
-          NULL, # case when !isnull(lead(`f_cSrc`, 0)) ... else NULL end
-          NULL, # case when !isnull(lead(`f_cSrc`, 0)) ... else NULL end
+          NULL, # case when !isnull(lag(`f_cSrc`, 0)) ... else NULL end
+          NULL, # case when !isnull(lag(`f_cSrc`, 0)) ... else NULL end
           0.66445182724252494,
           0.66445182724252494,
           0.66445182724252494,
@@ -146,7 +146,7 @@ cases:
           0.66666666666666663,
           0.66666666666666663,
           0.66666666666666663,
-          NULL, NULL, NULL, # case when !isnull(lead(`f_cId`, 0)) then ... else NULL
+          NULL, NULL, NULL, # case when !isnull(lag(`f_cId`, 0)) then ... else NULL
           reqId1, 1 ]
       - [reqId2, reqId2, 1609894067190, f_requestId2, f_cId2, f_cSrc2, f_uId2, 2.000000,
          402.000000,
@@ -216,8 +216,8 @@ cases:
         `f_cLength` as flattenRequest_f_cLength_original_10,
         sum(`f_cLength`) over flattenRequest_f_requestId_eventTime_0s_604801s as flattenRequest_f_cLength_window_sum_32,
         fz_top1_ratio(`f_cId`) over flattenRequest_f_requestId_eventTime_0s_604801s as flattenRequest_f_cId_window_top1_ratio_40,
-        case when !isnull(lead(`f_cSrc`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cSrc`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cSrc_window_count_42,
-        case when !isnull(lead(`f_cId`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cId`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cId_window_count_47
+        case when !isnull(lag(`f_cSrc`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cSrc`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cSrc_window_count_42,
+        case when !isnull(lag(`f_cId`, 0)) over flattenRequest_f_requestId_eventTime_0s_604801s then count(`f_cId`) over flattenRequest_f_requestId_eventTime_0s_604801s else null end as flattenRequest_f_cId_window_count_47
     from
         `flattenRequest`
         window flattenRequest_f_requestId_eventTime_0s_604801s as (partition by `f_requestId` order by `eventTime` rows_range between 604801s preceding and 0s preceding))
